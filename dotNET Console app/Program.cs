@@ -3,27 +3,28 @@ using System.Collections.Generic;
 
 namespace dotNET_Console_app
 {
+    public class JoinProcess : CompositeCommand
+    {
+        public JoinProcess()
+        {
+            Add(new CheckFromPoliceCommand());
+            Add(new CreateUserCommand());
+            Add(new SendNotificationCommand());
+        }
+    }
     class Program
     {
-        public class JoinProcess : CommandHandler
-        {
-            public JoinProcess()
-            {
-                Add(new CheckFromPoliceCommand());
-                Add(new CreateUserCommand());
-                Add(new SendNotificationCommand());
-            }
-        }
         static void Main(string[] args)
         {
-            var commandHandler = new CommandHandler();
-
-            commandHandler.Add(new CheckFromPoliceCommand());
-            commandHandler.Add(new CreateUserCommand());
-            commandHandler.Add(new SendNotificationCommand());
-
-            commandHandler.Run();
-
+            var process = new JoinProcess();
+            if (!process.Execute())
+            {
+                process.Rollback();
+            }
+            foreach (var error in process.Errors)
+            {
+                Console.WriteLine(error);
+            }
             Console.WriteLine("\r\nPress any key to continue ...");
             Console.ReadKey();
 
@@ -38,25 +39,34 @@ namespace dotNET_Console_app
     }
     public abstract class Command : ICommand
     {
-        public IList<string> Errors { get; } = new List<string>();
+        public virtual IList<string> Errors { get; } = new List<string>();
         public abstract bool Execute();
         public virtual bool Rollback()
         {
             return true;
         }
     }
-    public class CreateUserCommand : Command
+    public class CreateUserCommand : CompositeCommand
+    {
+        public CreateUserCommand()
+        {
+            Add(new CreateDbUserCommand());
+            Add(new CreateUserCommand());
+        }
+    }
+    public class CreateDbUserCommand : Command
     {
         public override bool Execute()
         {
-            Console.WriteLine("Creating user account.");
-
+            Console.WriteLine("Creating user to database");
             return true;
         }
-        public override bool Rollback()
+    }
+    public class CreateAzureBloblContainerForUser : Command
+    {
+        public override bool Execute()
         {
-            Console.WriteLine("Rollback user account.");
-            Errors.Add("ROLLBACK: user account");
+            Console.WriteLine("");
             return true;
         }
     }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace dotNET_Console_app
 {
-    class CommandHandler
+    public class CommandHandler
     {
         private readonly IList<ICommand> _commands;
         public CommandHandler()
