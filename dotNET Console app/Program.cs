@@ -51,7 +51,7 @@ namespace dotNET_Console_app
         public CreateUserCommand()
         {
             Add(new CreateDbUserCommand());
-            Add(new CreateUserCommand());
+            Add(new CreateAzureBloblContainerForUser());
         }
     }
     public class CreateDbUserCommand : Command
